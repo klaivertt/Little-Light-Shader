@@ -1,0 +1,6 @@
+
+*.vsidx
+/Prog/.vs
+/Prog/Game/x64
+Prog/x64/Debug/Game.pdb
+Prog/x64/Debug/Game.exe
