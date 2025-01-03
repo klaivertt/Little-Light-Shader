@@ -1,32 +1,32 @@
-// Uniform variables passed from the application
-
-// Position of the light (mouse position)
-uniform vec2 lightPos;  
-
-// Radius of the light
-uniform float radius;    
-// Color of the light
-uniform vec3 lightColor;    
-// Height of the screen (used to correct Y-axis)
-uniform float screenHeight;
+// Uniform variables
+uniform float time;           // Temps écoulé (pour l'animation des ondulations)
+uniform vec2 resolution;      // Résolution de l'écran (largeur et hauteur)
 
 void main()
 {
-    // Correct the Y-axis to match OpenGL's coordinate system
-    vec2 correctedLightPos = vec2(lightPos.x, screenHeight - lightPos.y);
+    // Coordonnées normalisées (entre 0 et 1)
+    vec2 uv = gl_FragCoord.xy / resolution;
 
-    // Current pixel position in screen coordinates
-    vec2 pos = gl_FragCoord.xy;
+    // Ajustement de l'aspect pour éviter les déformations
+    uv.y *= resolution.y / resolution.x;
 
-    // Calculate the distance between the current pixel and the light source
-    float dist = length(pos - correctedLightPos);
+    // Génération des ondulations
+    float wave1 = sin(uv.x * 10.0 + time * 2.0) * 0.05;
+    float wave2 = cos(uv.y * 15.0 - time * 1.5) * 0.03;
+    float wave3 = sin((uv.x + uv.y) * 8.0 + time * 1.0) * 0.02;
 
-    // Compute light intensity based on distance
-    float intensity = 1.0 - smoothstep(0.0, radius, dist);
+    // Combinaison des ondulations
+    float waves = wave1 + wave2 + wave3;
 
-    // Final color of the pixel with applied light effect
-    vec3 color = lightColor * intensity;
+    // Couleur de base (bleu aquatique)
+    vec3 baseColor = vec3(0.0, 0.3, 0.5);
 
-    // Output the final color to the fragment
-    gl_FragColor = vec4(color, 0.8);
+    // Ajout d'une variation de teinte selon les ondulations
+    vec3 finalColor = baseColor + vec3(waves * 0.1, waves * 0.15, waves * 0.2);
+
+    // Augmenter la luminosité pour simuler un effet de réflexion
+    finalColor += vec3(0.1, 0.1, 0.15) * smoothstep(0.0, 0.2, waves);
+
+    // Sortie de la couleur finale
+    gl_FragColor = vec4(finalColor, 1.0);
 }

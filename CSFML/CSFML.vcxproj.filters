@@ -20,7 +20,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Debug\Light.frag">
+    <None Include="..\x64\Debug\Assets\Shader\Light.frag">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="..\x64\Debug\Assets\Shader\Water.frag">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="..\x64\Debug\Assets\Shader\WaterLight.frag">
       <Filter>Fichiers de ressources</Filter>
     </None>
   </ItemGroup>

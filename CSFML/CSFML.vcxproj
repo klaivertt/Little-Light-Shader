@@ -140,7 +140,9 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Debug\Light.frag" />
+    <None Include="..\x64\Debug\Assets\Shader\Light.frag" />
+    <None Include="..\x64\Debug\Assets\Shader\Water.frag" />
+    <None Include="..\x64\Debug\Assets\Shader\WaterLight.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
