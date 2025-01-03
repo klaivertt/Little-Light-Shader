@@ -1,6 +1,0 @@
-﻿  main.c
-C:\Users\Scryl\OneDrive\Bureau\Cour\Abosio\Prog1\Csfml\Shader\CSFML\main.c(45,71): warning C4305: 'initialisation' : troncation de 'double' à 'float'
-C:\Users\Scryl\OneDrive\Bureau\Cour\Abosio\Prog1\Csfml\Shader\CSFML\main.c(45,76): warning C4305: 'initialisation' : troncation de 'double' à 'float'
-C:\Users\Scryl\OneDrive\Bureau\Cour\Abosio\Prog1\Csfml\Shader\CSFML\main.c(62,76): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
-C:\Users\Scryl\OneDrive\Bureau\Cour\Abosio\Prog1\Csfml\Shader\CSFML\main.c(62,88): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
-  CSFML.vcxproj -> C:\Users\Scryl\OneDrive\Bureau\Cour\Abosio\Prog1\Csfml\Shader\x64\Debug\CSFML.exe
