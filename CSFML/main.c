@@ -12,8 +12,12 @@
 typedef struct MainData 
 {
     sfRenderWindow* window;
-    sfRectangleShape* rect;
-    sfShader* shader;
+    sfRectangleShape* rectLight;
+    sfRectangleShape* rectWater;
+    sfRectangleShape* rectWaterLight;
+    sfShader* lightShader;
+    sfShader* waterShader;
+    sfShader* waterLightShader;
     sfClock* clock;
     sfBool waterMode;
 } MainData;
@@ -46,8 +50,32 @@ int main()
         sfEvent event;
         while (sfRenderWindow_pollEvent(data.window, &event))
         {
-            if (event.type == sfEvtClosed)
+            switch (event.type)
+            {
+            case sfEvtClosed:
                 sfRenderWindow_close(data.window);
+                break;
+
+            case sfEvtKeyPressed:
+                switch (event.key.code)
+                {
+                case sfKeyA:
+                    // Toggle water mode
+                    data.waterMode = !data.waterMode; 
+                    break;
+
+                case sfKeyEscape:
+                    // Close window on Escape
+                    sfRenderWindow_close(data.window);
+                    break;
+
+                default:
+                    break;
+                }
+                break;
+            default:
+                break;
+            }
         }
 
         // Update and draw
@@ -65,31 +93,91 @@ int main()
 sfBool loadResources(MainData* _data)
 {
     // Create the render window
-    _data->window = sfRenderWindow_create((sfVideoMode) {SCREEN_W, SCREEN_H, BPP},"Light Shader", sfResize | sfClose,NULL);
+    _data->window = sfRenderWindow_create(
+        (sfVideoMode) {
+        SCREEN_W, SCREEN_H, BPP
+    },
+        "Light Shader",
+        sfResize | sfClose,
+        NULL
+    );
     if (!_data->window)
     {
         fprintf(stderr, "Failed to create window.\n");
         return sfFalse;
     }
 
-    // Create the rectangle shape
-    _data->rect = sfRectangleShape_create();
-    if (!_data->rect)
+    // Create the rectangle shapes
+    _data->rectLight = sfRectangleShape_create();
+    if (!_data->rectLight)
     {
-        fprintf(stderr, "Failed to create rectangle shape.\n");
+        fprintf(stderr, "Failed to create rectLight.\n");
         sfRenderWindow_destroy(_data->window);
         return sfFalse;
     }
 
-    sfRectangleShape_setSize(_data->rect, (sfVector2f) { SCREEN_W, SCREEN_H });
-    sfRectangleShape_setPosition(_data->rect, (sfVector2f) { 0, 0 });
-
-    // Load the shader from file
-    _data->shader = sfShader_createFromFile(NULL, NULL, "Light.frag");
-    if (!_data->shader)
+    _data->rectWater = sfRectangleShape_create();
+    if (!_data->rectWater)
     {
-        fprintf(stderr, "Failed to load shader.\n");
-        sfRectangleShape_destroy(_data->rect);
+        fprintf(stderr, "Failed to create rectWater.\n");
+        sfRectangleShape_destroy(_data->rectLight);
+        sfRenderWindow_destroy(_data->window);
+        return sfFalse;
+    }
+
+    _data->rectWaterLight = sfRectangleShape_create();
+    if (!_data->rectWaterLight)
+    {
+        fprintf(stderr, "Failed to create rectWaterLight.\n");
+        sfRectangleShape_destroy(_data->rectWater);
+        sfRectangleShape_destroy(_data->rectLight);
+        sfRenderWindow_destroy(_data->window);
+        return sfFalse;
+    }
+
+    // Set sizes and positions for rectangles
+    sfRectangleShape_setSize(_data->rectLight, (sfVector2f) { SCREEN_W, SCREEN_H });
+    sfRectangleShape_setPosition(_data->rectLight, (sfVector2f) { 0, 0 });
+
+    sfRectangleShape_setSize(_data->rectWater, (sfVector2f) { SCREEN_W, SCREEN_H });
+    sfRectangleShape_setPosition(_data->rectWater, (sfVector2f) { 0, 0 });
+
+    sfRectangleShape_setSize(_data->rectWaterLight, (sfVector2f) { SCREEN_W, SCREEN_H });
+    sfRectangleShape_setPosition(_data->rectWaterLight, (sfVector2f) { 0, 0 });
+
+    // Load shaders
+    _data->lightShader = sfShader_createFromFile(NULL, NULL, "Assets/Shader/Light.frag");
+    if (!_data->lightShader)
+    {
+        fprintf(stderr, "Failed to load lightShader.\n");
+        sfRectangleShape_destroy(_data->rectWaterLight);
+        sfRectangleShape_destroy(_data->rectWater);
+        sfRectangleShape_destroy(_data->rectLight);
+        sfRenderWindow_destroy(_data->window);
+        return sfFalse;
+    }
+
+    _data->waterShader = sfShader_createFromFile(NULL, NULL, "Assets/Shader/Water.frag");
+    if (!_data->waterShader)
+    {
+        fprintf(stderr, "Failed to load waterShader.\n");
+        sfShader_destroy(_data->lightShader);
+        sfRectangleShape_destroy(_data->rectWaterLight);
+        sfRectangleShape_destroy(_data->rectWater);
+        sfRectangleShape_destroy(_data->rectLight);
+        sfRenderWindow_destroy(_data->window);
+        return sfFalse;
+    }
+
+    _data->waterLightShader = sfShader_createFromFile(NULL, NULL, "Assets/Shader/WaterLight.frag");
+    if (!_data->waterLightShader)
+    {
+        fprintf(stderr, "Failed to load waterLightShader.\n");
+        sfShader_destroy(_data->waterShader);
+        sfShader_destroy(_data->lightShader);
+        sfRectangleShape_destroy(_data->rectWaterLight);
+        sfRectangleShape_destroy(_data->rectWater);
+        sfRectangleShape_destroy(_data->rectLight);
         sfRenderWindow_destroy(_data->window);
         return sfFalse;
     }
@@ -99,15 +187,26 @@ sfBool loadResources(MainData* _data)
     if (!_data->clock)
     {
         fprintf(stderr, "Failed to create clock.\n");
-        sfShader_destroy(_data->shader);
-        sfRectangleShape_destroy(_data->rect);
+        sfShader_destroy(_data->waterLightShader);
+        sfShader_destroy(_data->waterShader);
+        sfShader_destroy(_data->lightShader);
+        sfRectangleShape_destroy(_data->rectWaterLight);
+        sfRectangleShape_destroy(_data->rectWater);
+        sfRectangleShape_destroy(_data->rectLight);
         sfRenderWindow_destroy(_data->window);
         return sfFalse;
     }
 
     // Set static shader uniforms
-    sfShader_setFloatUniform(_data->shader, "radius", 150.0f);
-    sfShader_setVec3Uniform(_data->shader, "lightColor", (sfGlslVec3) { 1.0f, 0.8f, 0.7f });
+    sfShader_setFloatUniform(_data->lightShader, "radius", 150.0f);
+    sfShader_setVec3Uniform(_data->lightShader, "lightColor", (sfGlslVec3) { 1.0f, 0.8f, 0.7f });
+    sfShader_setFloatUniform(_data->lightShader, "screenHeight", SCREEN_H);
+    
+    sfShader_setVec2Uniform(_data->waterShader, "resolution", (sfGlslVec2) { SCREEN_W, SCREEN_H });
+
+    sfShader_setFloatUniform(_data->waterLightShader, "radius", 150.0f);
+    sfShader_setVec3Uniform(_data->waterLightShader, "lightColor", (sfGlslVec3) { 1.0f, 0.8f, 0.9f });
+    sfShader_setFloatUniform(_data->waterLightShader, "screenHeight", SCREEN_H);
 
     return sfTrue;
 }
@@ -117,27 +216,41 @@ void update(MainData* _data)
 {
     // Get the elapsed time
     sfTime elapsed = sfClock_getElapsedTime(_data->clock);
-    float timeInSeconds = sfTime_asSeconds(elapsed);
+    float dt = sfTime_asSeconds(elapsed);
 
     // Update dynamic uniforms
-    sfShader_setFloatUniform(_data->shader, "screenHeight", SCREEN_H);
-    sfShader_setFloatUniform(_data->shader, "time", timeInSeconds);
+    sfShader_setFloatUniform(_data->waterShader, "time", dt);
+    sfShader_setFloatUniform(_data->waterLightShader, "time", dt);
 
     // Get the mouse position and pass it to the shader
     sfVector2i mousePos = sfMouse_getPositionRenderWindow(_data->window);
-    sfShader_setVec2Uniform(_data->shader, "lightPos", (sfGlslVec2) { (float)mousePos.x, (float)mousePos.y });
+    sfShader_setVec2Uniform(_data->lightShader, "lightPos", (sfGlslVec2) { (float)mousePos.x, (float)mousePos.y });
+    sfShader_setVec2Uniform(_data->waterLightShader, "lightPos", (sfGlslVec2) { (float)mousePos.x, (float)mousePos.y });
 }
 
 // Function to draw the frame
 void draw(MainData* _data)
 {
     // Clear the screen
-    sfRenderWindow_clear(_data->window, sfBlack);
-
-    // Draw the rectangle with the shader
-    sfRenderWindow_drawRectangleShape(_data->window, _data->rect,
-        &(sfRenderStates) {.shader = _data->shader, .blendMode = sfBlendAlpha, .transform = sfTransform_Identity, .texture = NULL }
-    );
+    sfRenderWindow_clear(_data->window, sfWhite);
+    if (_data->waterMode)
+    {
+        // Draw the rectangle with the Water Light shader and the Water Shader
+        sfRenderWindow_drawRectangleShape(_data->window, _data->rectWater,
+            &(sfRenderStates) {.shader = _data->waterShader, .blendMode = sfBlendAlpha, .transform = sfTransform_Identity, .texture = NULL }
+        );  
+        
+        sfRenderWindow_drawRectangleShape(_data->window, _data->rectWaterLight,
+            &(sfRenderStates) {.shader = _data->waterLightShader, .blendMode = sfBlendAlpha, .transform = sfTransform_Identity, .texture = NULL }
+        );
+    }
+    else
+    {
+        // Draw the rectangle with the Light shader
+        sfRenderWindow_drawRectangleShape(_data->window, _data->rectLight,
+            &(sfRenderStates) {.shader = _data->lightShader, .blendMode = sfBlendAlpha, .transform = sfTransform_Identity, .texture = NULL }
+        );
+    }
 
     // Display the rendered frame
     sfRenderWindow_display(_data->window);
@@ -146,13 +259,13 @@ void draw(MainData* _data)
 // Function to clean up resources
 void cleanup(MainData* _data)
 {
-    if (_data->shader)
+    if (_data->lightShader)
     {
-        sfShader_destroy(_data->shader);
+        sfShader_destroy(_data->lightShader);
     }
-    if (_data->rect)
+    if (_data->rectLight)
     {
-        sfRectangleShape_destroy(_data->rect);
+        sfRectangleShape_destroy(_data->rectLight);
     }
     if (_data->clock)
     {
