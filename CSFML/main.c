@@ -4,13 +4,13 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#define SCREEN_W 1400
+#define SCREEN_H 900
+#define BPP 32
 int main()
 {
     // Create the render window
-    sfRenderWindow* window = sfRenderWindow_create(
-        (sfVideoMode) {
-        800, 600, 32
-    }, "Light Shader", sfResize | sfClose, NULL);
+    sfRenderWindow* window = sfRenderWindow_create((sfVideoMode) {SCREEN_W, SCREEN_H, BPP}, "Light Shader", sfResize | sfClose, NULL);
     if (!window)
     {
         fprintf(stderr, "Failed to create window.\n");
@@ -27,7 +27,7 @@ int main()
         sfRenderWindow_destroy(window);
         return EXIT_FAILURE;
     }
-    sfRectangleShape_setSize(rect, (sfVector2f) { 800, 600 });
+    sfRectangleShape_setSize(rect, (sfVector2f) { SCREEN_W, SCREEN_H});
     sfRectangleShape_setPosition(rect, (sfVector2f) { 0, 0 });
 
     // Load the shader from file
@@ -55,7 +55,7 @@ int main()
         }
 
         // Set dynamic uniforms
-        sfShader_setFloatUniform(shader, "screenHeight", 600.0f);
+        sfShader_setFloatUniform(shader, "screenHeight", SCREEN_H);
 
         // Get the mouse position and pass it to the shader
         sfVector2i mousePos = sfMouse_getPositionRenderWindow(window);
