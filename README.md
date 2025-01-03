@@ -7,6 +7,7 @@ This project demonstrates a simple light shader effect implemented using **CSFML
 - Adjustable light color, radius, and intensity.
 - OpenGL-compatible shader written in GLSL.
 - Smooth Y-axis correction for consistent rendering across systems.
+- Switch Shader with key "A"
 
 ## 🖥️ **How It Works**
 
