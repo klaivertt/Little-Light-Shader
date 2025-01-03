@@ -16,6 +16,7 @@ int main()
         fprintf(stderr, "Failed to create window.\n");
         return EXIT_FAILURE;
     }
+    sfClock* clock = sfClock_create();
 
     sfEvent event;
 
@@ -31,7 +32,7 @@ int main()
     sfRectangleShape_setPosition(rect, (sfVector2f) { 0, 0 });
 
     // Load the shader from file
-    sfShader* shader = sfShader_createFromFile(NULL, NULL, "shader.frag");
+    sfShader* shader = sfShader_createFromFile(NULL, NULL, "Light.frag");
     if (!shader)
     {
         fprintf(stderr, "Failed to load shader.\n");
@@ -54,8 +55,12 @@ int main()
                 sfRenderWindow_close(window);
         }
 
+        sfTime elapsed = sfClock_getElapsedTime(clock);
+        float timeInSeconds = sfTime_asSeconds(elapsed);
+
         // Set dynamic uniforms
         sfShader_setFloatUniform(shader, "screenHeight", SCREEN_H);
+        sfShader_setFloatUniform(shader, "time", timeInSeconds);
 
         // Get the mouse position and pass it to the shader
         sfVector2i mousePos = sfMouse_getPositionRenderWindow(window);
