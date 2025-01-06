@@ -35,8 +35,8 @@ void main()
     vec3 waterColor = baseColor + vec3(smoothRipples * 0.1, smoothRipples * 0.1, smoothRipples * 0.1) + vec3(depth * 0.1);
 
     // Simulate light reflections for more realism
-    float reflection = smoothstep(0.8, 1.0, sin((distortedUV.x + distortedUV.y) * 50.0 + time * 3.5));
-    waterColor += vec3(0.3, 0.4, 0.6) * reflection;
+    float reflection = smoothstep(0.8, 1.0, sin((distortedUV.x + distortedUV.y) * 20.0 + time * 3.5));
+    waterColor += vec3(0.05, 0.05, 0.15) * reflection;
 
     // Enhance brightness for a polished look
     waterColor = pow(waterColor, vec3(1.3));
